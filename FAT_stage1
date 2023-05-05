@@ -1,0 +1,260 @@
+UA_Size = 16
+NR_UA = 4096
+NR_UA_FAT = 512
+
+NR_UA_ROOT = 64
+NAME = 8
+EXT = 3
+DIM = 2
+START_UA = 2
+FLAG = 1
+
+NUM = [0,1,2,3,4,5,6,7,8,9]
+ALPHA = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+HEX = []
+
+HDD = [[0 for j in range (UA_Size)]for i in range(NR_UA)]
+FAT=[0 for i in range(NR_UA)]
+ROOT = [[' ' for j in range(UA_Size)] for i in range(NR_UA_ROOT)]
+
+
+
+#FAT
+def freeUA():
+    for i in range(NR_UA):
+        if(FAT[i]==0):
+            return  i
+    return -1
+
+
+
+def initFat(matrix):
+    for i in range(NR_UA):
+        if i < NR_UA_FAT:
+            FAT[i] = 1
+        elif i < NR_UA_FAT+NR_UA_ROOT:
+            FAT[i] = 2
+        elif i < NR_UA:
+            FAT[i] = 0
+
+
+
+
+def printFat(matrix):
+    elem = ''
+    spacedElem = ''
+    for i, element in enumerate(matrix):
+        elem +=str(element)
+        if i % 16 == 0:
+            spacedElem = " ".join(elem)
+            print(spacedElem)
+            print()
+            spacedElem=''
+            elem = ''
+
+
+def updateFat(change_ua,value):
+	FAT[change_ua] = value;
+
+
+def fatOnHDD():
+    convertedFAT = sliced2BytesList(FAT)
+    counter = 0
+    for i in range(NR_UA_FAT):
+        for j in range(UA_Size):
+            HDD[i][j] = convertedFAT[counter]
+            counter+=1
+
+
+
+def countFreeMemory():
+    counter = 0
+    for i in range(len(FAT)):
+        if FAT[i] == 0:
+            counter+=1
+    return counter
+
+#
+##
+###ROOT
+##
+#
+
+def printRoot():
+    for row in ROOT:
+        print(row)
+
+
+def freeOnRoot():
+    for i in range(NR_UA_ROOT):
+        for j in range(UA_Size):
+            if ROOT[i][j] == ' ':
+                return i
+    return -1
+
+
+
+def insertInRoot(name,ext,size,startUA,flag):
+    real_name = name
+    if len(real_name)<8:
+        for i in range(len(real_name),8):
+            real_name.append("0")
+    name1 = sliceBytesList(real_name)
+    ext1 = sliceBytesList(ext)
+    size1 = sliced2BytesList(size)
+    startUA1 = sliced2BytesList(startUA)
+    flag1 = sliceBytesList(flag)
+
+    data = name1 + ext1 + size1 + startUA1 + flag1
+
+    free = freeOnRoot()
+    availableMemory = countFreeMemory()
+    #error handler
+    if availableMemory < size[0]:
+        print(f"There are only {availableMemory + 16} bytes free.")
+
+    if free == -1:
+        print("The root is full")
+        exit(1)
+
+    for i in range(UA_Size):
+        ROOT[free][i] = data[i]
+
+
+
+def rootOnHDD():
+    counter = 0
+    for i in range(NR_UA_FAT,NR_UA_FAT+NR_UA_ROOT):
+        for j in range(UA_Size):
+            HDD[i][j] = ROOT[counter][j]
+        counter+=1
+
+#
+##
+###HDD
+##
+#
+def printHDD():
+    for row in HDD:
+        print(row)
+
+
+
+def uploadOnHDD(data):
+    data_size = len(data)
+    to_bytes = sliceBytesList(data)
+    data_slices = [to_bytes[i:i+UA_Size] for i in range(0,data_size,UA_Size)]
+    counter = 0
+    for i, slice_data in enumerate(data_slices):
+        col = 0
+        UA = freeUA()
+        for j,byte in enumerate(slice_data):
+            HDD[UA][col] = byte
+            col +=1
+            counter +=1
+            if counter == len(to_bytes):
+                FAT[UA] = 3
+            if col == 16:
+                col = 0
+                FAT[UA] = '?'
+                nextUA = freeUA()
+                updateFat(UA,nextUA)
+
+
+
+
+
+
+#
+##
+###DATA MANIPULATION
+##
+#
+
+#convert to 2 bytes
+
+#converts one int/character in 2 bytes -> used in sliceData
+def convertTo2Bytes(data):
+    if isinstance(data, int):
+        convertion  = bin(data)[2:]
+        output= convertion.zfill(16)
+        return output
+    elif isinstance(data, str):
+        ascii_code = ord(data)
+        convertion = bin(ascii_code)[2:]
+        output = convertion.zfill(16)
+        return  output
+
+
+#converts a list of elements into bytes -> used in sliceData
+def convertList2Bytes(data):
+    convertedElement = ""
+    fullData = ""
+    for i in data:
+        convertedElement = convertTo2Bytes(i)
+        fullData += convertedElement
+
+    return fullData
+
+
+#converts a list of elements into bytes and returns a sliced version
+def sliced2BytesList(some_list):
+    ''' converts a list of elements into bytes and returns a sliced version '''
+    convertedList = convertList2Bytes(some_list)
+    secondList = []
+    for i in range(0, len(convertedList), 8):
+        substring = convertedList[i:i+8]
+        secondList.append(substring)
+    return secondList
+
+
+
+
+#convert to single byte
+
+def convertToByte(data):
+    if isinstance(data, int):
+        convertion  = bin(data)[2:]
+        output= convertion.zfill(8)
+        return output
+    elif isinstance(data, str):
+        ascii_code = ord(data)
+        convertion = bin(ascii_code)[2:]
+        output = convertion.zfill(8)
+        return  output
+
+
+#converts a list of elements into bytes -> used in sliceBytesList
+def convertListToBytes(data):
+    convertedElement = ""
+    fullData = ""
+    for i in data:
+        convertedElement = convertToByte(i)
+        fullData += convertedElement
+
+    return fullData
+
+def sliceBytesList(some_list):
+    ''' converts a list of elements into bytes and returns a sliced version '''
+    convertedList = convertListToBytes(some_list)
+    secondList = []
+    for i in range(0, len(convertedList), 8):
+        substring = convertedList[i:i+8]
+        secondList.append(substring)
+    return secondList
+
+
+
+
+#START MAIN
+ceva = [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9]
+altceva = [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9]
+
+
+t = sliceBytesList(ceva)
+print(t)
+byte_array = bytearray([int(binary,2) for binary in t])
+decoded = byte_array.decode('ascii')
+print(decoded)
+
+#END MAIN
