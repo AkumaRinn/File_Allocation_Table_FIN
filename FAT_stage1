@@ -1,3 +1,5 @@
+from numpy import *
+
 UA_Size = 16
 NR_UA = 4096
 NR_UA_FAT = 512
@@ -81,8 +83,28 @@ def countFreeMemory():
 #
 
 def printRoot():
+    freeCounter = 0
+    nume = []
+    extensie = []
+    marime = []
+    inceput = []
+    steag = []
     for row in ROOT:
-        print(row)
+        if row[0] != ' ':
+            nume  = row[0:8]
+            extensie = row[8:11]
+            marime = row [11:13]
+            inceput = row [13:15]
+            steag = row [15:16]
+            print(f"Nume: {fromBytesToTxt(nume)}\tExtensie: {fromBytesToTxt(extensie)}\tMarime: {from2BytesToNumbers(marime)}"
+                  f"\tUA_Inceput: {from2BytesToNumbers(inceput)}\tFlag: {fromBytesToNumbers(steag)}")
+
+    for row in ROOT:
+        if row[0] == ' ':
+            freeCounter+=1
+            if freeCounter == 64:
+                print("The root is empty")
+
 
 
 def freeOnRoot():
@@ -99,6 +121,8 @@ def insertInRoot(name,ext,size,startUA,flag):
     if len(real_name)<8:
         for i in range(len(real_name),8):
             real_name.append("0")
+    if len(real_name) > 8:
+        return "Name size out of bounds"
     name1 = sliceBytesList(real_name)
     ext1 = sliceBytesList(ext)
     size1 = sliced2BytesList(size)
@@ -119,6 +143,8 @@ def insertInRoot(name,ext,size,startUA,flag):
 
     for i in range(UA_Size):
         ROOT[free][i] = data[i]
+
+    rootOnHDD()
 
 
 
@@ -173,7 +199,7 @@ def uploadOnHDD(data):
 
 #convert to 2 bytes
 
-#converts one int/character in 2 bytes -> used in sliceData
+#converts one int/character in 2 bytes
 def convertTo2Bytes(data):
     if isinstance(data, int):
         convertion  = bin(data)[2:]
@@ -186,7 +212,7 @@ def convertTo2Bytes(data):
         return  output
 
 
-#converts a list of elements into bytes -> used in sliceData
+#converts a list of elements into bytes
 def convertList2Bytes(data):
     convertedElement = ""
     fullData = ""
@@ -244,17 +270,43 @@ def sliceBytesList(some_list):
     return secondList
 
 
+#convert the bytes to TXT/NR
 
+def fromBytesToTxt(some_list):
+    characters = ""
+    for i in range(len(some_list)):
+        integer = (int(some_list[i], 2))
+        character = chr(integer)
+        characters += character
+    return characters
+
+def fromBytesToNumbers(some_list):
+    characters = ""
+    for i in range(len(some_list)):
+        integer = (int(some_list[i], 2))
+        characters += str(integer)
+    return characters
+
+
+def from2BytesToNumbers(some_list):
+    characters = ""
+    element = ""
+    for i in range(0, len(some_list), 2):
+        element = some_list[i]+some_list[i+1]
+        integer = int(element, 2)
+        characters += str(integer)
+        element = ""
+    return characters
 
 #START MAIN
-ceva = [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9]
-altceva = [1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9]
+nume = ['n','u','m','e']
+extensie = ['b','i','n']
+marime = [2034]
+inceput = [3455]
+steag = [0]
+insertInRoot(nume,extensie,marime,inceput,steag)
+insertInRoot(nume,extensie,marime,inceput,steag)
 
 
-t = sliceBytesList(ceva)
-print(t)
-byte_array = bytearray([int(binary,2) for binary in t])
-decoded = byte_array.decode('ascii')
-print(decoded)
 
 #END MAIN
