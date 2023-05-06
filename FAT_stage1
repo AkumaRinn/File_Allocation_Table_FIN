@@ -327,8 +327,8 @@ def processUserInput():
         if len(command_parts) < 5:
             flag = 0
         else:
-            flag = command_parts[4]
-        CreateFile(file_name, file_ext, size, type)
+            flag = int(command_parts[4])
+        CreateFile(file_name, file_ext, size, type, flag)
 
     elif command == "read":
         ReadFile()
@@ -338,16 +338,32 @@ def processUserInput():
 
 
 #CREATE fis1.txt 25 -ALFA
-def CreateFile(name, extension, size, type):
+def CreateFile(name, extension, size, type,flag):
     #1. creare lista de date
     elements_list = []
+    lista_in_bytes = []
     if type == "alpha":
         elements_list = ALPHA
     elif type == "num":
         elements_list = NUM
     repeated_lst = itertools.cycle(elements_list)
     result = [next(repeated_lst) for _ in range(size)]
-    print(result)
+    #2. inserare in ROOT
+    name1 = list(name)
+    extension1 = list(extension)
+    size1 = [size]
+    flag1 = [flag]
+    startingUA = freeUA()
+    startingUA1=[startingUA]
+    insertInRoot(name1,extension1,size1,startingUA1,flag1)
+    rootOnHDD()
+    #3. Upload On HDD the data
+    uploadOnHDD(result)
+
+
+
+
+
 
 def DeleteFile():
     print()
@@ -362,13 +378,12 @@ def CopyFile():
     print()
 
 #START MAIN
-nume = ['n','u','m','e']
-extensie = ['b','i','n']
-marime = [2034]
-inceput = [3455]
-steag = [0]
-
+initFat(FAT)
+fatOnHDD()
 processUserInput()
+printRoot()
+printHDD()
+printFat(FAT)
 
 
 
