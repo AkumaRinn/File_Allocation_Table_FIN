@@ -1,4 +1,5 @@
 from numpy import *
+import itertools
 
 UA_Size = 16
 NR_UA = 4096
@@ -117,12 +118,15 @@ def freeOnRoot():
 
 
 def insertInRoot(name,ext,size,startUA,flag):
+    '''parametrii trebuie sa fie liste'''
     real_name = name
+    if len(real_name) > 8:
+        print("Name size out of bounds")
+        exit(1)
     if len(real_name)<8:
         for i in range(len(real_name),8):
             real_name.append("0")
-    if len(real_name) > 8:
-        return "Name size out of bounds"
+
     name1 = sliceBytesList(real_name)
     ext1 = sliceBytesList(ext)
     size1 = sliced2BytesList(size)
@@ -298,14 +302,73 @@ def from2BytesToNumbers(some_list):
         element = ""
     return characters
 
+
+
+
+
+#
+##
+###FUNCTII USER
+##
+#
+
+
+def processUserInput():
+    user_input = input("Enter command: ")
+    command_parts = user_input.split()
+    command = command_parts[0].lower()
+    if command == "create":
+        file = command_parts[1]
+        file = file.split(".")
+        file_name = file[0]
+        file_ext = file[1]
+        size = int(command_parts[2])
+        type = command_parts[3].lower()
+        if len(command_parts) < 5:
+            flag = 0
+        else:
+            flag = command_parts[4]
+        CreateFile(file_name, file_ext, size, type)
+
+    elif command == "read":
+        ReadFile()
+
+
+
+
+
+#CREATE fis1.txt 25 -ALFA
+def CreateFile(name, extension, size, type):
+    #1. creare lista de date
+    elements_list = []
+    if type == "alpha":
+        elements_list = ALPHA
+    elif type == "num":
+        elements_list = NUM
+    repeated_lst = itertools.cycle(elements_list)
+    result = [next(repeated_lst) for _ in range(size)]
+    print(result)
+
+def DeleteFile():
+    print()
+
+def ReadFile():
+    print()
+
+def RenameFile():
+    print()
+
+def CopyFile():
+    print()
+
 #START MAIN
 nume = ['n','u','m','e']
 extensie = ['b','i','n']
 marime = [2034]
 inceput = [3455]
 steag = [0]
-insertInRoot(nume,extensie,marime,inceput,steag)
-insertInRoot(nume,extensie,marime,inceput,steag)
+
+processUserInput()
 
 
 
