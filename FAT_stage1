@@ -313,8 +313,17 @@ def from2BytesToNumbers(some_list):
 ###FUNCTII USER
 ##
 #
-
-
+available_commands = '''commands - this command.
+help 'command name' 
+create - creates a file
+del - deletes a file
+ls - prints all available files
+exit - exits the system'''
+commands_dict = {"create":"create -> creates a new file.\nThe arguments it needs are: 'file_name'.'extension' 'size'(int) 'file_type'(NUM,ALPHA) 'flag'(1,0)-optional\nValid 'create' command: create file.txt 12 NUM",
+                 "del": "del -> deletes an existing file.\nThe arguments it needs are: 'file_name'\nValid 'def' command: del file",
+                 "ls":"Prints all the available files.",
+                 "exit":"exits the system",
+                 }
 def processUserInput():
     user_input = input("root@tmpt~: ")
     command_parts = user_input.split()
@@ -338,10 +347,16 @@ def processUserInput():
         printRoot()
     elif command == "exit":
         exitSystem()
+    elif command == "commands":
+        print(available_commands)
+        print("~You can type help 'command name' for more information about a command~")
+    elif command == "help":
+        search_command = command_parts[1]
+        print(commands_dict[search_command])
     else:
         print("Enter a valid command")
-        print("~Type commands to see a list of all available commands.~")
-        print("~You can type help 'command name' for more information about a command~")
+        print("~Type 'commands' to see a list of all available commands.~")
+
 
 
 
@@ -410,6 +425,7 @@ def DeleteFile(file_name):
             for i in range(len(ROOT[found_on_row])):
                 ROOT[found_on_row][i] = ' '
             print(f"~File '{file_name}' deleted.~")
+            rootOnHDD()
         else:
             #if file stored on more UA
             while FAT[address] != 3:
@@ -427,7 +443,8 @@ def DeleteFile(file_name):
             #free the ROOT
             for i in range(len(ROOT[found_on_row])):
                 ROOT[found_on_row][i] = ' '
-
+            fatOnHDD()
+            rootOnHDD()
             print(f"~File '{file_name}' deleted.~")
 
 
@@ -476,8 +493,5 @@ def exitSystem():
 initSystem()
 while True:
     processUserInput()
-
-
-
 
 #END MAIN
