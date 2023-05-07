@@ -1,5 +1,7 @@
-from numpy import *
 import itertools
+import time
+import os
+import design
 
 UA_Size = 16
 NR_UA = 4096
@@ -125,7 +127,7 @@ def insertInRoot(name,ext,size,startUA,flag):
         exit(1)
     if len(real_name)<8:
         for i in range(len(real_name),8):
-            real_name.append("0")
+            real_name.append(" ")
 
     name1 = sliceBytesList(real_name)
     ext1 = sliceBytesList(ext)
@@ -314,7 +316,7 @@ def from2BytesToNumbers(some_list):
 
 
 def processUserInput():
-    user_input = input("Enter command: ")
+    user_input = input("root@tmpt~: ")
     command_parts = user_input.split()
     command = command_parts[0].lower()
     if command == "create":
@@ -329,9 +331,20 @@ def processUserInput():
         else:
             flag = int(command_parts[4])
         CreateFile(file_name, file_ext, size, type, flag)
+    elif command == "del":
+        file_name = command_parts[1]
+        DeleteFile(file_name)
+    elif command =="ls":
+        printRoot()
+    elif command == "exit":
+        exitSystem()
+    else:
+        print("Enter a valid command")
+        print("~Type commands to see a list of all available commands.~")
+        print("~You can type help 'command name' for more information about a command~")
 
-    elif command == "read":
-        ReadFile()
+
+
 
 
 
@@ -359,14 +372,34 @@ def CreateFile(name, extension, size, type,flag):
     rootOnHDD()
     #3. Upload On HDD the data
     uploadOnHDD(result)
+    print("File created succesfully")
+
+
+#Functie folosita doar in DeleteFile
+def find_name_index(matrix,lst):
+    '''find a list of strings in a matrix'''
+    for i, row in enumerate(matrix):
+        if set(lst).issubset(set(row)):
+            return i
+    return -1
+
+def DeleteFile(file_name):
+    #1. free the FAT
+    found_on_row = -1
+    name_as_list = list(file_name)
+    delete_name = sliceBytesList(name_as_list)
+    found_on_row = find_name_index(ROOT,delete_name)
+    if found_on_row == -1:
+        print("File not found.")
+    else:
+        print(f"File found at row {found_on_row}")
 
 
 
 
 
+    #2. free the root
 
-def DeleteFile():
-    print()
 
 def ReadFile():
     print()
@@ -377,13 +410,41 @@ def RenameFile():
 def CopyFile():
     print()
 
+#
+##
+### System Functions
+##
+#
+
+
+
+def initSystem():
+    initFat(FAT)
+    fatOnHDD()
+    rootOnHDD()
+    print(design.logo)
+
+
+def exitSystem():
+    wrong_input = True
+    while wrong_input:
+        verify = (input("Are you sure you want to shut down the system? Y/N"))
+        if verify.lower() == 'y':
+            print("System shutting down. Goodbye!")
+            time.sleep(3)
+            exit(1)
+        elif verify.lower() == 'n':
+            print("Command canceled")
+            wrong_input = False
+        else:
+            print("Write 'y' to confirm or 'n' to cancel.")
+
+
 #START MAIN
-initFat(FAT)
-fatOnHDD()
-processUserInput()
-printRoot()
-printHDD()
-printFat(FAT)
+initSystem()
+while True:
+    processUserInput()
+
 
 
 
