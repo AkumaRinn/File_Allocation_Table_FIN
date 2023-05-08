@@ -340,6 +340,9 @@ def processUserInput():
         else:
             flag = int(command_parts[4])
         CreateFile(file_name, file_ext, size, type, flag)
+    elif command == "read":
+        file_name = command_parts[1]
+        ReadFile(file_name)
     elif command == "del":
         file_name = command_parts[1]
         DeleteFile(file_name)
@@ -374,6 +377,7 @@ def CreateFile(name, extension, size, type,flag):
         elements_list = ALPHA
     elif type == "num":
         elements_list = NUM
+
     repeated_lst = itertools.cycle(elements_list)
     result = [next(repeated_lst) for _ in range(size)]
     #2. inserare in ROOT
@@ -450,8 +454,76 @@ def DeleteFile(file_name):
 
 
 
-def ReadFile():
-    print()
+def ReadFile(file_name):
+    addresses_list = []
+    byte = '00000000'
+    message = []
+    decode_way = ""
+    decoded_message = ""
+    next_address = 0
+    found_on_row = -1
+    name_as_list = list(file_name)
+    read_file = sliceBytesList(name_as_list)
+    found_on_row = find_name_index(ROOT, read_file)
+    if found_on_row == -1:
+        print("File not found.")
+    else:
+        address_in_bytes = ROOT[found_on_row][13:15]
+        address = int(from2BytesToNumbers(address_in_bytes))
+        # if file stored on one UA
+        #eliminare dubluri
+        if FAT[address] == 3:
+            addresses_list.append(address)
+            for i in range(len(HDD[address])):
+                #conversie din bytes in txt sau num
+                if HDD[address][i] != 0:
+                    message.append(HDD[address][i])
+                    if i == 0:
+                        if HDD[address][i] == byte:
+                            decode_way = "num"
+                        else:
+                            decode_way = "alpha"
+            if decode_way == "num":
+                decoded_message = " ".join(fromBytesToNumbers(message))
+                print(decoded_message)
+            else:
+                decoded_message = " ".join(fromBytesToTxt(message))
+                print(decoded_message)
+
+
+        else:
+            # if file stored on more UA
+            while FAT[address] != 3:
+                addresses_list.append(address)
+                addresses_list.append(FAT[address])
+                next_address = FAT[address]
+                address = next_address
+            if FAT[address] == 3:
+                addresses_list.append(address)
+
+            new_list = []
+            for i in addresses_list:
+                if i not in new_list:
+                    new_list.append(i)
+            addresses_list = new_list
+
+
+            for i in range(len(addresses_list)):
+                for j in range(len(HDD[addresses_list[i]])):
+                    if HDD[addresses_list[i]][j] != 0:
+                        message.append(HDD[addresses_list[i]][j])
+            if HDD[addresses_list[0]][0] == byte:
+                decode_way = "num"
+            else:
+                decode_way = "alpha"
+            if decode_way == "num":
+                decoded_message = " ".join(fromBytesToNumbers(message))
+                print(decoded_message)
+            else:
+                decoded_message = " ".join(fromBytesToTxt(message))
+                print(decoded_message)
+
+
 
 def RenameFile():
     print()
@@ -472,6 +544,7 @@ def initSystem():
     fatOnHDD()
     rootOnHDD()
     print(design.logo)
+    print("~Type 'commands' to see a list of all available commands.~")
 
 
 def exitSystem():
