@@ -316,13 +316,17 @@ def from2BytesToNumbers(some_list):
 available_commands = '''commands - this command.
 help 'command name' 
 create - creates a file
+read - reads a file
+rename - renames a file 
 del - deletes a file
 ls - prints all available files
 exit - exits the system'''
 commands_dict = {"create":"create -> creates a new file.\nThe arguments it needs are: 'file_name'.'extension' 'size'(int) 'file_type'(NUM,ALPHA) 'flag'(1,0)-optional\nValid 'create' command: create file.txt 12 NUM",
                  "del": "del -> deletes an existing file.\nThe arguments it needs are: 'file_name'\nValid 'def' command: del file",
-                 "ls":"Prints all the available files.",
-                 "exit":"exits the system",
+                 "ls":"ls -> prints all the available files.",
+                 "exit":"exit -> exits the system",
+                 "read":"read -> prints the content of a file.\nThe arguments it needs are: 'file_name'.\nValid 'read' command: read file",
+                 "rename":"rename -> renames a file.\nThe arguments it needs are: 'current_file_name' 'new_file_name'\nValid 'rename' command: rename file1 file2"
                  }
 def processUserInput():
     user_input = input("root@tmpt~: ")
@@ -343,6 +347,10 @@ def processUserInput():
     elif command == "read":
         file_name = command_parts[1]
         ReadFile(file_name)
+    elif command == "rename":
+        current_name = command_parts[1]
+        new_name = command_parts[2]
+        RenameFile(current_name,new_name)
     elif command == "del":
         file_name = command_parts[1]
         DeleteFile(file_name)
@@ -394,7 +402,7 @@ def CreateFile(name, extension, size, type,flag):
     print("File created succesfully")
 
 
-#Functie folosita doar in DeleteFile
+
 def find_name_index(matrix,lst):
     '''find a list of strings in a matrix'''
     for i, row in enumerate(matrix):
@@ -525,8 +533,22 @@ def ReadFile(file_name):
 
 
 
-def RenameFile():
-    print()
+def RenameFile(current_name, new_name):
+    new_name1=new_name
+    new_name_list = list(new_name1)
+    if len(new_name1)>8:
+        return "The name you try to use is too big. It must be of maximum 8 characters."
+    elif len(new_name1) < 8:
+        for i in range(len(new_name1),8):
+            new_name_list.append(" ")
+    name_as_list = list(current_name)
+    new_name_sliced = sliceBytesList(new_name_list)
+    slice_current_name = sliceBytesList(name_as_list)
+    find_name = find_name_index(ROOT, slice_current_name)
+    for i in range(len(new_name_sliced)):
+        ROOT[find_name][i] = new_name_sliced[i]
+    print(f"~File '{current_name}' renamed to '{new_name}'~")
+
 
 def CopyFile():
     print()
