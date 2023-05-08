@@ -16,7 +16,6 @@ FLAG = 1
 
 NUM = [0,1,2,3,4,5,6,7,8,9]
 ALPHA = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-HEX = []
 
 HDD = [[0 for j in range (UA_Size)]for i in range(NR_UA)]
 FAT=[0 for i in range(NR_UA)]
@@ -193,10 +192,6 @@ def uploadOnHDD(data):
                 updateFat(UA,nextUA)
 
 
-
-
-
-
 #
 ##
 ###DATA MANIPULATION
@@ -241,9 +236,7 @@ def sliced2BytesList(some_list):
 
 
 
-
 #convert to single byte
-
 def convertToByte(data):
     if isinstance(data, int):
         convertion  = bin(data)[2:]
@@ -304,10 +297,6 @@ def from2BytesToNumbers(some_list):
         element = ""
     return characters
 
-
-
-
-
 #
 ##
 ###FUNCTII USER
@@ -333,27 +322,39 @@ def processUserInput():
     command_parts = user_input.split()
     command = command_parts[0].lower()
     if command == "create":
-        file = command_parts[1]
-        file = file.split(".")
-        file_name = file[0]
-        file_ext = file[1]
-        size = int(command_parts[2])
-        type = command_parts[3].lower()
-        if len(command_parts) < 5:
-            flag = 0
-        else:
-            flag = int(command_parts[4])
-        CreateFile(file_name, file_ext, size, type, flag)
+        try:
+            file = command_parts[1]
+            file = file.split(".")
+            file_name = file[0]
+            file_ext = file[1]
+            size = int(command_parts[2])
+            type = command_parts[3].lower()
+            if len(command_parts) < 5:
+                flag = 0
+            else:
+                flag = int(command_parts[4])
+            CreateFile(file_name, file_ext, size, type, flag)
+        except:
+            print("Invalid arguments. Use help 'command_name' for more information")
     elif command == "read":
-        file_name = command_parts[1]
-        ReadFile(file_name)
+        try:
+            file_name = command_parts[1]
+            ReadFile(file_name)
+        except:
+            print("Invalid arguments. Use help 'command_name' for more information")
     elif command == "rename":
-        current_name = command_parts[1]
-        new_name = command_parts[2]
-        RenameFile(current_name,new_name)
+        try:
+            current_name = command_parts[1]
+            new_name = command_parts[2]
+            RenameFile(current_name,new_name)
+        except:
+            print("Invalid arguments. Use help 'command_name' for more information")
     elif command == "del":
-        file_name = command_parts[1]
-        DeleteFile(file_name)
+        try:
+            file_name = command_parts[1]
+            DeleteFile(file_name)
+        except:
+            print("Invalid arguments. Use help 'command_name' for more information")
     elif command =="ls":
         printRoot()
     elif command == "exit":
@@ -362,18 +363,14 @@ def processUserInput():
         print(available_commands)
         print("~You can type help 'command name' for more information about a command~")
     elif command == "help":
-        search_command = command_parts[1]
-        print(commands_dict[search_command])
+        try:
+            search_command = command_parts[1]
+            print(commands_dict[search_command])
+        except:
+            print("Invalid arguments. Use help 'command_name' for more information")
     else:
         print("Enter a valid command")
         print("~Type 'commands' to see a list of all available commands.~")
-
-
-
-
-
-
-
 
 
 #CREATE fis1.txt 25 -ALFA
@@ -400,6 +397,7 @@ def CreateFile(name, extension, size, type,flag):
     #3. Upload On HDD the data
     uploadOnHDD(result)
     print("File created succesfully")
+
 
 
 
@@ -550,8 +548,6 @@ def RenameFile(current_name, new_name):
     print(f"~File '{current_name}' renamed to '{new_name}'~")
 
 
-def CopyFile():
-    print()
 
 #
 ##
