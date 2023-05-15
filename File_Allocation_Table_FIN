@@ -1,7 +1,7 @@
 import itertools
 import time
 import os
-import design
+import style
 
 UA_Size = 16
 NR_UA = 4096
@@ -309,13 +309,15 @@ read - reads a file
 rename - renames a file 
 del - deletes a file
 ls - prints all available files
-exit - exits the system'''
+exit - exits the system
+mem stat - print internal memory ~needs root credentials~'''
 commands_dict = {"create":"create -> creates a new file.\nThe arguments it needs are: 'file_name'.'extension' 'size'(int) 'file_type'(NUM,ALPHA) 'flag'(1,0)-optional\nValid 'create' command: create file.txt 12 NUM",
                  "del": "del -> deletes an existing file.\nThe arguments it needs are: 'file_name'\nValid 'def' command: del file",
                  "ls":"ls -> prints all the available files.",
                  "exit":"exit -> exits the system",
                  "read":"read -> prints the content of a file.\nThe arguments it needs are: 'file_name'.\nValid 'read' command: read file",
-                 "rename":"rename -> renames a file.\nThe arguments it needs are: 'current_file_name' 'new_file_name'\nValid 'rename' command: rename file1 file2"
+                 "rename":"rename -> renames a file.\nThe arguments it needs are: 'current_file_name' 'new_file_name'\nValid 'rename' command: rename file1 file2",
+                 "mem stat":"mem stat -> print memory stats.\nWarning! Root credentials needed in order to execute this command."
                  }
 def processUserInput():
     user_input = input("root@tmpt~: ")
@@ -359,6 +361,25 @@ def processUserInput():
         printRoot()
     elif command == "exit":
         exitSystem()
+    elif command =="mem":
+        verified = True
+        try:
+            elem = command_parts[1]
+            if elem != "stat":
+                verified = False
+        except:
+            print("Invalid arguments. Use help 'command_name' for more information")
+        if verified:
+            password = str(input("password: "))
+            if password == "root":
+                second_try = str(input("verify password: "))
+                if second_try == "root":
+                    printHDD()
+                else:
+                    print("Invalid password")
+            else:
+                print("Invalid password")
+
     elif command == "commands":
         print(available_commands)
         print("~You can type help 'command name' for more information about a command~")
@@ -397,6 +418,7 @@ def CreateFile(name, extension, size, type,flag):
     #3. Upload On HDD the data
     uploadOnHDD(result)
     print("File created succesfully")
+
 
 
 
@@ -561,7 +583,7 @@ def initSystem():
     initFat(FAT)
     fatOnHDD()
     rootOnHDD()
-    print(design.logo)
+    print(style.logo)
     print("~Type 'commands' to see a list of all available commands.~")
 
 
